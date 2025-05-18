@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+*{
+  accent1-bgcolor: "#002333";
+  accent2-text-color: "#159A9C";
+  accentColor3: "#DEEFE7";
+  accent1-text-color:  "#FFFFFF";
+  bg-color:  "#B4BEC9";
+}

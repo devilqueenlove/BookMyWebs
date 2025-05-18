@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Search, Plus, Trash2, Edit, Save, X, Bookmark } from 'lucide-react';
 
 // Main App Component
 export default function BookmarkApp() {
@@ -50,64 +51,11 @@ export default function BookmarkApp() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // When URL is changed, try to fetch the title of the website
-    if (name === 'url' && value.trim() !== '') {
-      fetchWebsiteTitle(value);
-    }
-  };
-  
-  // Function to fetch website title from URL
-  const fetchWebsiteTitle = async (url) => {
-    // Ensure URL has a protocol
-    let formattedUrl = url;
-    if (!/^https?:\/\//i.test(formattedUrl)) {
-      formattedUrl = 'https://' + formattedUrl;
-    }
-    
-    try {
-      // Note: For a real production app, you would need a backend service or API
-      // to handle this request to avoid CORS issues. For demo purposes, we'll use
-      // a public CORS proxy service, but this is not recommended for production.
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      
-      // Show loading state
-      setFormData(prev => ({ ...prev, title: 'Fetching title...' }));
-      
-      // For real production code, use your own backend endpoint
-      // This will often fail due to CORS restrictions and proxy limitations
-      fetch(proxyUrl + formattedUrl)
-        .then(response => response.text())
-        .then(html => {
-          // Extract title from the HTML
-          const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-          const title = titleMatch ? titleMatch[1] : '';
-          
-          if (title) {
-            setFormData(prev => ({ ...prev, title }));
-          } else {
-            setFormData(prev => ({ ...prev, title: '' }));
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching title:', error);
-          setFormData(prev => ({ ...prev, title: '' }));
-        });
-    } catch (error) {
-      console.error('Error fetching website title:', error);
-      setFormData(prev => ({ ...prev, title: '' }));
-    }
   };
 
   // Add or update bookmark
   const handleSubmit = (e) => {
-    if (e) e.preventDefault();
-    
-    // Validate required fields
-    if (!formData.title || !formData.url) {
-      alert('Title and URL are required!');
-      return;
-    }
+    e.preventDefault();
     
     // Ensure URL has a protocol
     let url = formData.url;
@@ -148,9 +96,7 @@ export default function BookmarkApp() {
 
   // Delete bookmark
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this bookmark?')) {
-      setBookmarks(bookmarks.filter(bookmark => bookmark.id !== id));
-    }
+    setBookmarks(bookmarks.filter(bookmark => bookmark.id !== id));
   };
 
   // Edit bookmark
@@ -176,20 +122,21 @@ export default function BookmarkApp() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <header className="bg-blue-600 text-white p-4">
+      <header className="bg-gray-800 text-white p-4">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center">
-            📚 Bookmark Manager
+            <Bookmark className="mr-2" />
+            SaveMyWebs
           </h1>
           <div className="relative">
             <input
               type="text"
               placeholder="Search bookmarks..."
-              className="py-2 px-4 pr-10 rounded-lg text-gray-800 w-64"
+              className="py-2 px-4 pr-10 rounded-lg text-gray-50 w-64"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <span className="absolute right-3 top-2.5 text-gray-500">🔍</span>
+            <Search className="absolute right-3 top-2.5 text-gray-500" size={20} />
           </div>
         </div>
       </header>
@@ -200,7 +147,7 @@ export default function BookmarkApp() {
           <h2 className="font-semibold text-lg mb-4">Categories</h2>
           <ul>
             <li 
-              className={`p-2 cursor-pointer rounded-md mb-1 ${activeCategory === 'All' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}
+              className={`p-2 cursor-pointer rounded-md mb-1 ${activeCategory === 'All' ? 'bg-gray-300 text-gray-700' : 'hover:bg-gray-100'}`}
               onClick={() => setActiveCategory('All')}
             >
               All Bookmarks
@@ -208,7 +155,7 @@ export default function BookmarkApp() {
             {categories.map(category => (
               <li 
                 key={category}
-                className={`p-2 cursor-pointer rounded-md mb-1 ${activeCategory === category ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}
+                className={`p-2 cursor-pointer rounded-md mb-1 ${activeCategory === category ? 'bg-gray-300 text-gray-950' : 'hover:bg-gray-100'}`}
                 onClick={() => setActiveCategory(category)}
               >
                 {category}
@@ -227,10 +174,10 @@ export default function BookmarkApp() {
                   onChange={(e) => setNewCategoryName(e.target.value)}
                 />
                 <button 
-                  className="bg-green-500 text-white p-2 rounded-r-md"
+                  className="bg-gray-500 text-white p-2 rounded-r-md"
                   onClick={handleAddCategory}
                 >
-                  💾
+                  <Save size={16} />
                 </button>
               </div>
               <button 
@@ -242,10 +189,10 @@ export default function BookmarkApp() {
             </div>
           ) : (
             <button 
-              className="mt-4 flex items-center text-sm text-blue-600 hover:text-blue-800"
+              className="mt-4 flex items-center text-sm text-gray-600 hover:text-gray-800"
               onClick={() => setIsAddingCategory(true)}
             >
-              ➕ Add Category
+              <Plus size={16} className="mr-1" /> Add Category
             </button>
           )}
         </aside>
@@ -257,7 +204,7 @@ export default function BookmarkApp() {
               {activeCategory === 'All' ? 'All Bookmarks' : `${activeCategory} Bookmarks`}
             </h2>
             <button 
-              className="bg-blue-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-blue-700"
+              className="bg-gray-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-gray-700"
               onClick={() => {
                 setIsAddingBookmark(true);
                 setEditingBookmarkId(null);
@@ -269,13 +216,13 @@ export default function BookmarkApp() {
                 });
               }}
             >
-              ➕ Add Bookmark
+              <Plus size={18} className="mr-1" /> Add Bookmark
             </button>
           </div>
           
           {/* Bookmark Form */}
           {isAddingBookmark && (
-            <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+            <div className="absolute top-6 right-6 w-80 bg-gray-200 p-4 rounded-lg shadow-lg z-50">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold text-lg">
                   {editingBookmarkId !== null ? 'Edit Bookmark' : 'Add New Bookmark'}
@@ -287,11 +234,11 @@ export default function BookmarkApp() {
                     setEditingBookmarkId(null);
                   }}
                 >
-                  ❌
+                  <X size={20} />
                 </button>
               </div>
               
-              <div>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
                     Title
@@ -359,67 +306,98 @@ export default function BookmarkApp() {
                 </div>
                 
                 <button
-                  onClick={handleSubmit}
-                  className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                  type="submit"
+                  className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
                 >
                   {editingBookmarkId !== null ? 'Update Bookmark' : 'Add Bookmark'}
                 </button>
-              </div>
+              </form>
             </div>
           )}
           
           {/* Bookmark List */}
-          {filteredBookmarks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredBookmarks.map(bookmark => (
-                <div key={bookmark.id} className="bg-white p-4 rounded-lg shadow-md">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-semibold text-lg mb-2">{bookmark.title}</h3>
-                    <div className="flex space-x-2">
-                      <button 
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEdit(bookmark)}
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => handleDelete(bookmark.id)}
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <a 
-                    href={bookmark.url} 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 mb-2 block truncate text-sm"
-                  >
-                    {bookmark.url}
-                  </a>
-                  
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="bg-blue-100 text-blue-800 text-xs py-1 px-2 rounded-full">
-                      {bookmark.category}
-                    </span>
-                    <span className="text-gray-500 text-xs">
-                      {new Date(bookmark.dateAdded).toLocaleDateString()}
-                    </span>
-                  </div>
-                  
-                  {bookmark.description && (
-                    <p className="text-gray-600 text-sm mt-2">{bookmark.description}</p>
-                  )}
-                </div>
-              ))}
+{/* Bookmark List */}
+{filteredBookmarks.length > 0 ? (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+    {filteredBookmarks.map((bookmark) => {
+      const domain = new URL(bookmark.url).hostname.replace('www.', '');
+      return (
+        <div
+          key={bookmark.id}
+          className="bg-white p-4 rounded-2xl shadow-md transition hover:shadow-lg group cursor-pointer relative"
+          onClick={() => window.open(bookmark.url, '_blank')}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <img
+                src={`https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=32`}
+                alt="favicon"
+                className="w-5 h-5"
+              />
+              <h3
+                className="text-base font-semibold text-gray-800 truncate max-w-[180px]"
+                title={bookmark.title}
+              >
+                {bookmark.title}
+              </h3>
             </div>
-          ) : (
-            <div className="text-center py-10">
-              <p className="text-gray-500">No bookmarks found. Add a new bookmark to get started!</p>
+            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+              <button
+                className="text-gray-500 hover:text-gray-700 z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit(bookmark);
+                }}
+              >
+                <Edit size={16} />
+              </button>
+              <button
+                className="text-red-500 hover:text-red-700 z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(bookmark.id);
+                }}
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
+          </div>
+
+          <p
+            className="text-sm text-gray-500 mt-1 truncate"
+            title={bookmark.url}
+          >
+            {domain}
+          </p>
+
+          {bookmark.description && (
+            <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+              {bookmark.description}
+            </p>
           )}
+
+          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+            <span className="bg-gray-100 text-gray-700 py-1 px-2 rounded-full text-xs">
+              {bookmark.category}
+            </span>
+            <span>
+              {new Date(bookmark.dateAdded).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </span>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+) : (
+  <div className="text-center py-10">
+    <p className="text-gray-500">No bookmarks found. Add a new bookmark to get started!</p>
+  </div>
+)}
+
         </main>
       </div>
     </div>
