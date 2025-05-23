@@ -14,7 +14,8 @@ import {
   Folder,
   Star,
   ExternalLink,
-  Download
+  Download,
+  Loader
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { useTheme } from './contexts/ThemeContext';
@@ -22,6 +23,7 @@ import { db } from './firebase/config';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import AuthModal from './components/auth/AuthModal';
 import ImportExport from './components/ImportExport';
+import { fetchUrlMetadata, extractTitleFromUrl } from './utils/urlMetadata';
 
 // Main App Component
 export default function BookmarkApp() {
@@ -50,6 +52,9 @@ export default function BookmarkApp() {
     category: 'Work',
     description: ''
   });
+  
+  // Metadata fetching state
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
 
   // Fetch bookmarks from Firestore when user logs in
   useEffect(() => {
@@ -91,6 +96,39 @@ export default function BookmarkApp() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // If URL field is changed and has reasonable length, fetch metadata
+    if (name === 'url' && value.length > 5) {
+      fetchMetadata(value);
+    }
+  };
+  
+  // Fetch metadata from URL
+  const fetchMetadata = async (url) => {
+    // Don't fetch if URL is too short or already fetching
+    if (url.length < 5 || isFetchingMetadata) return;
+    
+    setIsFetchingMetadata(true);
+    
+    try {
+      const metadata = await fetchUrlMetadata(url);
+      
+      // Only update title and description if they're empty or match domain name
+      const currentTitle = formData.title;
+      const currentDesc = formData.description;
+      const domainTitle = extractTitleFromUrl(url);
+      
+      // Update form data with fetched metadata if fields are empty or contain default values
+      setFormData(prev => ({
+        ...prev,
+        title: (!currentTitle || currentTitle === domainTitle) && metadata.title ? metadata.title : prev.title,
+        description: (!currentDesc || currentDesc === '') && metadata.description ? metadata.description : prev.description
+      }));
+    } catch (error) {
+      console.error('Error fetching metadata:', error);
+    } finally {
+      setIsFetchingMetadata(false);
+    }
   };
 
   // Add or update bookmark
@@ -432,16 +470,26 @@ export default function BookmarkApp() {
                     <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2" htmlFor="url">
                       URL
                     </label>
-                    <input
-                      id="url"
-                      type="text"
-                      name="url"
-                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      placeholder="https://example.com"
-                      required
-                      value={formData.url}
-                      onChange={handleInputChange}
-                    />
+                    <div className="relative">
+                      <input
+                        id="url"
+                        type="text"
+                        name="url"
+                        className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        placeholder="https://example.com"
+                        required
+                        value={formData.url}
+                        onChange={handleInputChange}
+                      />
+                      {isFetchingMetadata && (
+                        <div className="absolute right-2 top-2 text-gray-500 dark:text-gray-400 animate-spin">
+                          <Loader size={20} />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Title and description will be automatically fetched when possible
+                    </p>
                   </div>
                   
                   <div>
@@ -583,7 +631,7 @@ export default function BookmarkApp() {
               </p>
               {currentUser && (
                 <button 
-                  className="mt-4 bg-teal-600 text-white py-2 px-6 rounded-md flex items-center mx-auto hover:bg-teal-700 transition-colors"
+                  className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors"
                   onClick={() => setIsAddingBookmark(true)}
                 >
                   <Plus size={18} className="mr-1" /> Add Your First Bookmark
