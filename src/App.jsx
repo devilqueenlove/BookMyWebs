@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Trash2, Edit, Save, X, Bookmark } from 'lucide-react';
+import { Search, Plus, Trash2, Edit, Save, X, Bookmark, LogOut, User } from 'lucide-react';
+import { useAuth } from './contexts/AuthContext';
+import { db } from './firebase/config';
+import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import AuthModal from './components/auth/AuthModal';
 
 // Main App Component
 export default function BookmarkApp() {
-  const [bookmarks, setBookmarks] = useState(() => {
-    const savedBookmarks = localStorage.getItem('bookmarks');
-    return savedBookmarks ? JSON.parse(savedBookmarks) : [];
-  });
+  const { currentUser, logout } = useAuth();
+  const [bookmarks, setBookmarks] = useState([]);
   
   const [categories, setCategories] = useState(() => {
     const savedCategories = localStorage.getItem('categories');
@@ -19,6 +21,7 @@ export default function BookmarkApp() {
   const [editingBookmarkId, setEditingBookmarkId] = useState(null);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -28,11 +31,28 @@ export default function BookmarkApp() {
     description: ''
   });
 
-  // Save to localStorage when data changes
+  // Fetch bookmarks from Firestore when user logs in
   useEffect(() => {
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-  }, [bookmarks]);
+    if (currentUser) {
+      const userBookmarksRef = collection(db, 'bookmarks');
+      const q = query(userBookmarksRef, where("userId", "==", currentUser.uid));
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const bookmarksData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setBookmarks(bookmarksData);
+      });
+      
+      return () => unsubscribe();
+    } else {
+      // If not logged in, reset bookmarks to empty array
+      setBookmarks([]);
+    }
+  }, [currentUser]);
   
+  // Save categories to localStorage (we'll move this to Firestore in a future enhancement)
   useEffect(() => {
     localStorage.setItem('categories', JSON.stringify(categories));
   }, [categories]);
@@ -54,8 +74,13 @@ export default function BookmarkApp() {
   };
 
   // Add or update bookmark
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
     
     // Ensure URL has a protocol
     let url = formData.url;
@@ -64,24 +89,34 @@ export default function BookmarkApp() {
     }
     
     if (editingBookmarkId !== null) {
-      // Update existing bookmark
-      setBookmarks(bookmarks.map(bookmark => 
-        bookmark.id === editingBookmarkId ? 
-        { ...bookmark, ...formData, url } : 
-        bookmark
-      ));
+      // Update existing bookmark in Firestore
+      try {
+        const bookmarkRef = doc(db, 'bookmarks', editingBookmarkId);
+        await updateDoc(bookmarkRef, {
+          title: formData.title,
+          url,
+          category: formData.category,
+          description: formData.description,
+          lastUpdated: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error("Error updating bookmark: ", error);
+      }
       setEditingBookmarkId(null);
     } else {
-      // Add new bookmark
-      const newBookmark = {
-        id: Date.now(),
-        title: formData.title,
-        url,
-        category: formData.category,
-        description: formData.description,
-        dateAdded: new Date().toISOString()
-      };
-      setBookmarks([...bookmarks, newBookmark]);
+      // Add new bookmark to Firestore
+      try {
+        await addDoc(collection(db, 'bookmarks'), {
+          userId: currentUser.uid,
+          title: formData.title,
+          url,
+          category: formData.category,
+          description: formData.description,
+          dateAdded: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error("Error adding bookmark: ", error);
+      }
     }
     
     // Reset form
@@ -95,8 +130,12 @@ export default function BookmarkApp() {
   };
 
   // Delete bookmark
-  const handleDelete = (id) => {
-    setBookmarks(bookmarks.filter(bookmark => bookmark.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'bookmarks', id));
+    } catch (error) {
+      console.error("Error deleting bookmark: ", error);
+    }
   };
 
   // Edit bookmark
@@ -120,6 +159,15 @@ export default function BookmarkApp() {
     }
   };
 
+  // Handle user logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <header className="bg-gray-800 text-white p-4">
@@ -128,15 +176,40 @@ export default function BookmarkApp() {
             <Bookmark className="mr-2" />
             SaveMyWebs
           </h1>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search bookmarks..."
-              className="py-2 px-4 pr-10 rounded-lg text-gray-50 w-64"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Search className="absolute right-3 top-2.5 text-gray-500" size={20} />
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search bookmarks..."
+                className="py-2 px-4 pr-10 rounded-lg text-black w-64"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute right-3 top-2.5 text-gray-500" size={20} />
+            </div>
+            
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm">
+                  {currentUser.email}
+                </span>
+                <button 
+                  onClick={handleLogout}
+                  className="p-2 rounded-full hover:bg-gray-700"
+                  title="Log out"
+                >
+                  <LogOut size={20} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setShowAuthModal(true)}
+                className="flex items-center bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg"
+              >
+                <User size={18} className="mr-2" />
+                Log In
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -206,6 +279,10 @@ export default function BookmarkApp() {
             <button 
               className="bg-gray-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-gray-700"
               onClick={() => {
+                if (!currentUser) {
+                  setShowAuthModal(true);
+                  return;
+                }
                 setIsAddingBookmark(true);
                 setEditingBookmarkId(null);
                 setFormData({
@@ -219,6 +296,20 @@ export default function BookmarkApp() {
               <Plus size={18} className="mr-1" /> Add Bookmark
             </button>
           </div>
+          
+          {/* Auth Message for Non-Logged-In Users */}
+          {!currentUser && (
+            <div className="bg-blue-50 text-blue-700 p-4 rounded-lg mb-6">
+              <p className="font-medium">Sign in to save your bookmarks across devices</p>
+              <p className="text-sm mt-1">Your bookmarks will be securely stored in the cloud and accessible anywhere.</p>
+              <button 
+                className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+                onClick={() => setShowAuthModal(true)}
+              >
+                Sign In / Create Account
+              </button>
+            </div>
+          )}
           
           {/* Bookmark Form */}
           {isAddingBookmark && (
@@ -316,90 +407,99 @@ export default function BookmarkApp() {
           )}
           
           {/* Bookmark List */}
-{/* Bookmark List */}
-{filteredBookmarks.length > 0 ? (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-    {filteredBookmarks.map((bookmark) => {
-      const domain = new URL(bookmark.url).hostname.replace('www.', '');
-      return (
-        <div
-          key={bookmark.id}
-          className="bg-white p-4 rounded-2xl shadow-md transition hover:shadow-lg group cursor-pointer relative"
-          onClick={() => window.open(bookmark.url, '_blank')}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <img
-                src={`https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=32`}
-                alt="favicon"
-                className="w-5 h-5"
-              />
-              <h3
-                className="text-base font-semibold text-gray-800 truncate max-w-[180px]"
-                title={bookmark.title}
-              >
-                {bookmark.title}
-              </h3>
-            </div>
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-              <button
-                className="text-gray-500 hover:text-gray-700 z-10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(bookmark);
-                }}
-              >
-                <Edit size={16} />
-              </button>
-              <button
-                className="text-red-500 hover:text-red-700 z-10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(bookmark.id);
-                }}
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </div>
+          {filteredBookmarks.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              {filteredBookmarks.map((bookmark) => {
+                const domain = new URL(bookmark.url).hostname.replace('www.', '');
+                return (
+                  <div
+                    key={bookmark.id}
+                    className="bg-white p-4 rounded-2xl shadow-md transition hover:shadow-lg group cursor-pointer relative"
+                    onClick={() => window.open(bookmark.url, '_blank')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={`https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=32`}
+                          alt="favicon"
+                          className="w-5 h-5"
+                        />
+                        <h3
+                          className="text-base font-semibold text-gray-800 truncate max-w-[180px]"
+                          title={bookmark.title}
+                        >
+                          {bookmark.title}
+                        </h3>
+                      </div>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                        <button
+                          className="text-gray-500 hover:text-gray-700 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(bookmark);
+                          }}
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          className="text-red-500 hover:text-red-700 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(bookmark.id);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
 
-          <p
-            className="text-sm text-gray-500 mt-1 truncate"
-            title={bookmark.url}
-          >
-            {domain}
-          </p>
+                    <p
+                      className="text-sm text-gray-500 mt-1 truncate"
+                      title={bookmark.url}
+                    >
+                      {domain}
+                    </p>
 
-          {bookmark.description && (
-            <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-              {bookmark.description}
-            </p>
-          )}
+                    {bookmark.description && (
+                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                        {bookmark.description}
+                      </p>
+                    )}
 
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-            <span className="bg-gray-100 text-gray-700 py-1 px-2 rounded-full text-xs">
-              {bookmark.category}
-            </span>
-            <span>
-              {new Date(bookmark.dateAdded).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
+                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+                      <span className="bg-gray-100 text-gray-700 py-1 px-2 rounded-full text-xs">
+                        {bookmark.category}
+                      </span>
+                      <span>
+                        {new Date(bookmark.dateAdded).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                );
               })}
-            </span>
-          </div>
-        </div>
-      );
-    })}
-  </div>
-) : (
-  <div className="text-center py-10">
-    <p className="text-gray-500">No bookmarks found. Add a new bookmark to get started!</p>
-  </div>
-)}
-
+            </div>
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-gray-500">
+                {currentUser 
+                  ? "No bookmarks found. Add a new bookmark to get started!" 
+                  : "Sign in to see your bookmarks or add new ones."}
+              </p>
+            </div>
+          )}
         </main>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={() => setShowAuthModal(false)}
+      />
     </div>
   );
 }
