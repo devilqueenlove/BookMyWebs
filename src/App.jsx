@@ -13,13 +13,15 @@ import {
   Sun,
   Folder,
   Star,
-  ExternalLink
+  ExternalLink,
+  Download
 } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { useTheme } from './contexts/ThemeContext';
 import { db } from './firebase/config';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import AuthModal from './components/auth/AuthModal';
+import ImportExport from './components/ImportExport';
 
 // Main App Component
 export default function BookmarkApp() {
@@ -39,6 +41,7 @@ export default function BookmarkApp() {
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -343,25 +346,36 @@ export default function BookmarkApp() {
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
               {activeCategory === 'All' ? 'All Bookmarks' : `${activeCategory} Bookmarks`}
             </h2>
-            <button 
-              className="bg-teal-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-teal-700 transition-colors"
-              onClick={() => {
-                if (!currentUser) {
-                  setShowAuthModal(true);
-                  return;
-                }
-                setIsAddingBookmark(true);
-                setEditingBookmarkId(null);
-                setFormData({
-                  title: '',
-                  url: '',
-                  category: categories[0],
-                  description: ''
-                });
-              }}
-            >
-              <Plus size={18} className="mr-1" /> Add Bookmark
-            </button>
+            
+            <div className="flex gap-2">
+              {currentUser && (
+                <button 
+                  className="bg-blue-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-blue-700 transition-colors"
+                  onClick={() => setShowImportExport(true)}
+                >
+                  <Download size={18} className="mr-1" /> Import/Export
+                </button>
+              )}
+              <button 
+                className="bg-teal-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-teal-700 transition-colors"
+                onClick={() => {
+                  if (!currentUser) {
+                    setShowAuthModal(true);
+                    return;
+                  }
+                  setIsAddingBookmark(true);
+                  setEditingBookmarkId(null);
+                  setFormData({
+                    title: '',
+                    url: '',
+                    category: categories[0],
+                    description: ''
+                  });
+                }}
+              >
+                <Plus size={18} className="mr-1" /> Add Bookmark
+              </button>
+            </div>
           </div>
           
           {/* Auth Message for Non-Logged-In Users */}
@@ -580,6 +594,34 @@ export default function BookmarkApp() {
         </main>
       </div>
 
+      {/* Import/Export Dialog */}
+      {showImportExport && currentUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-3xl w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-semibold text-lg text-gray-800 dark:text-white">
+                Import & Export Bookmarks
+              </h3>
+              <button 
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                onClick={() => setShowImportExport(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <ImportExport 
+              bookmarks={bookmarks}
+              categories={categories}
+              onImportComplete={() => {
+                // Could refresh bookmarks if needed
+                setShowImportExport(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+      
       {/* Auth Modal */}
       <AuthModal
         isOpen={showAuthModal}
