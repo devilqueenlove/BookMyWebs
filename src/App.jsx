@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Trash2, Edit, Save, X, Bookmark, LogOut, User } from 'lucide-react';
+import { 
+  Search, 
+  Plus, 
+  Trash2, 
+  Edit, 
+  Save, 
+  X, 
+  Bookmark, 
+  LogOut, 
+  User, 
+  Moon, 
+  Sun,
+  Folder,
+  Star,
+  ExternalLink
+} from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
+import { useTheme } from './contexts/ThemeContext';
 import { db } from './firebase/config';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import AuthModal from './components/auth/AuthModal';
@@ -8,6 +24,7 @@ import AuthModal from './components/auth/AuthModal';
 // Main App Component
 export default function BookmarkApp() {
   const { currentUser, logout } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [bookmarks, setBookmarks] = useState([]);
   
   const [categories, setCategories] = useState(() => {
@@ -159,6 +176,24 @@ export default function BookmarkApp() {
     }
   };
 
+  // Delete category
+  const handleDeleteCategory = (categoryToDelete) => {
+    // Don't delete if there are bookmarks with this category
+    const hasBookmarks = bookmarks.some(bookmark => bookmark.category === categoryToDelete);
+    
+    if (hasBookmarks) {
+      alert(`Cannot delete category '${categoryToDelete}' because it contains bookmarks. Please reassign or delete these bookmarks first.`);
+      return;
+    }
+    
+    setCategories(categories.filter(category => category !== categoryToDelete));
+    
+    // If the active category is deleted, switch to 'All'
+    if (activeCategory === categoryToDelete) {
+      setActiveCategory('All');
+    }
+  };
+
   // Handle user logout
   const handleLogout = async () => {
     try {
@@ -169,11 +204,11 @@ export default function BookmarkApp() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <header className="bg-gray-800 text-white p-4">
+    <div className={`flex flex-col h-screen ${isDark ? 'dark' : ''}`}>
+      <header className="bg-gray-800 dark:bg-gray-900 text-white p-4 shadow-md">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center">
-            <Bookmark className="mr-2" />
+            <Bookmark className="mr-2 text-teal-400" />
             SaveMyWebs
           </h1>
           <div className="flex items-center gap-4">
@@ -181,21 +216,29 @@ export default function BookmarkApp() {
               <input
                 type="text"
                 placeholder="Search bookmarks..."
-                className="py-2 px-4 pr-10 rounded-lg text-black w-64"
+                className="py-2 px-4 pr-10 rounded-lg text-gray-800 dark:text-white dark:bg-gray-700 dark:border-gray-600 w-64 focus:outline-none focus:ring-2 focus:ring-teal-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Search className="absolute right-3 top-2.5 text-gray-500" size={20} />
+              <Search className="absolute right-3 top-2.5 text-gray-500 dark:text-gray-400" size={20} />
             </div>
+            
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? <Sun size={20} className="text-yellow-300" /> : <Moon size={20} />}
+            </button>
             
             {currentUser ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm">
+                <span className="text-sm hidden md:inline">
                   {currentUser.email}
                 </span>
                 <button 
                   onClick={handleLogout}
-                  className="p-2 rounded-full hover:bg-gray-700"
+                  className="p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
                   title="Log out"
                 >
                   <LogOut size={20} />
@@ -204,7 +247,7 @@ export default function BookmarkApp() {
             ) : (
               <button 
                 onClick={() => setShowAuthModal(true)}
-                className="flex items-center bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg"
+                className="flex items-center bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg transition-colors"
               >
                 <User size={18} className="mr-2" />
                 Log In
@@ -216,22 +259,46 @@ export default function BookmarkApp() {
       
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-md p-4">
-          <h2 className="font-semibold text-lg mb-4">Categories</h2>
+        <aside className="w-64 bg-white dark:bg-gray-800 shadow-md p-4 overflow-y-auto">
+          <h2 className="font-semibold text-lg mb-4 text-gray-800 dark:text-white">Categories</h2>
           <ul>
             <li 
-              className={`p-2 cursor-pointer rounded-md mb-1 ${activeCategory === 'All' ? 'bg-gray-300 text-gray-700' : 'hover:bg-gray-100'}`}
+              className={`p-2 cursor-pointer rounded-md mb-1 flex items-center justify-between ${
+                activeCategory === 'All' 
+                  ? 'bg-teal-100 text-teal-800 dark:bg-teal-800 dark:text-teal-100' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200'
+              }`}
               onClick={() => setActiveCategory('All')}
             >
-              All Bookmarks
+              <div className="flex items-center">
+                <Star size={16} className="mr-2" />
+                All Bookmarks
+              </div>
             </li>
             {categories.map(category => (
               <li 
                 key={category}
-                className={`p-2 cursor-pointer rounded-md mb-1 ${activeCategory === category ? 'bg-gray-300 text-gray-950' : 'hover:bg-gray-100'}`}
+                className={`p-2 cursor-pointer rounded-md mb-1 flex items-center justify-between ${
+                  activeCategory === category 
+                    ? 'bg-teal-100 text-teal-800 dark:bg-teal-800 dark:text-teal-100' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200'
+                }`}
                 onClick={() => setActiveCategory(category)}
               >
-                {category}
+                <div className="flex items-center">
+                  <Folder size={16} className="mr-2" />
+                  {category}
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteCategory(category);
+                  }}
+                  className="group-hover:opacity-100 hover:text-red-500 dark:hover:text-red-400 transition-opacity"
+                  title={`Delete ${category} category`}
+                >
+                  <Trash2 size={16} />
+                </button>
               </li>
             ))}
           </ul>
@@ -241,20 +308,20 @@ export default function BookmarkApp() {
               <div className="flex">
                 <input
                   type="text"
-                  className="flex-1 p-2 border rounded-l-md"
+                  className="flex-1 p-2 border rounded-l-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="New category"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
                 />
                 <button 
-                  className="bg-gray-500 text-white p-2 rounded-r-md"
+                  className="bg-teal-600 text-white p-2 rounded-r-md hover:bg-teal-700 transition-colors"
                   onClick={handleAddCategory}
                 >
                   <Save size={16} />
                 </button>
               </div>
               <button 
-                className="w-full mt-2 text-red-500 text-sm p-1"
+                className="w-full mt-2 text-red-500 dark:text-red-400 text-sm p-1 hover:underline"
                 onClick={() => setIsAddingCategory(false)}
               >
                 Cancel
@@ -262,7 +329,7 @@ export default function BookmarkApp() {
             </div>
           ) : (
             <button 
-              className="mt-4 flex items-center text-sm text-gray-600 hover:text-gray-800"
+              className="mt-4 flex items-center text-sm text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
               onClick={() => setIsAddingCategory(true)}
             >
               <Plus size={16} className="mr-1" /> Add Category
@@ -271,13 +338,13 @@ export default function BookmarkApp() {
         </aside>
         
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-6 overflow-auto bg-gray-100 dark:bg-gray-900">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
               {activeCategory === 'All' ? 'All Bookmarks' : `${activeCategory} Bookmarks`}
             </h2>
             <button 
-              className="bg-gray-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-gray-700"
+              className="bg-teal-600 text-white py-2 px-4 rounded-md flex items-center hover:bg-teal-700 transition-colors"
               onClick={() => {
                 if (!currentUser) {
                   setShowAuthModal(true);
@@ -299,11 +366,11 @@ export default function BookmarkApp() {
           
           {/* Auth Message for Non-Logged-In Users */}
           {!currentUser && (
-            <div className="bg-blue-50 text-blue-700 p-4 rounded-lg mb-6">
+            <div className="bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 p-4 rounded-lg mb-6 border border-blue-200 dark:border-blue-800">
               <p className="font-medium">Sign in to save your bookmarks across devices</p>
               <p className="text-sm mt-1">Your bookmarks will be securely stored in the cloud and accessible anywhere.</p>
               <button 
-                className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+                className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
                 onClick={() => setShowAuthModal(true)}
               >
                 Sign In / Create Account
@@ -313,164 +380,174 @@ export default function BookmarkApp() {
           
           {/* Bookmark Form */}
           {isAddingBookmark && (
-            <div className="absolute top-6 right-6 w-80 bg-gray-200 p-4 rounded-lg shadow-lg z-50">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-lg">
-                  {editingBookmarkId !== null ? 'Edit Bookmark' : 'Add New Bookmark'}
-                </h3>
-                <button 
-                  className="text-gray-500 hover:text-gray-700"
-                  onClick={() => {
-                    setIsAddingBookmark(false);
-                    setEditingBookmarkId(null);
-                  }}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                    Title
-                  </label>
-                  <input
-                    id="title"
-                    type="text"
-                    name="title"
-                    className="w-full p-2 border rounded-md"
-                    placeholder="Website Title"
-                    required
-                    value={formData.title}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="url">
-                    URL
-                  </label>
-                  <input
-                    id="url"
-                    type="text"
-                    name="url"
-                    className="w-full p-2 border rounded-md"
-                    placeholder="https://example.com"
-                    required
-                    value={formData.url}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
-                    Category
-                  </label>
-                  <select
-                    id="category"
-                    name="category"
-                    className="w-full p-2 border rounded-md"
-                    value={formData.category}
-                    onChange={handleInputChange}
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold text-lg text-gray-800 dark:text-white">
+                    {editingBookmarkId !== null ? 'Edit Bookmark' : 'Add New Bookmark'}
+                  </h3>
+                  <button 
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                    onClick={() => {
+                      setIsAddingBookmark(false);
+                      setEditingBookmarkId(null);
+                    }}
                   >
-                    {categories.map(category => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
+                    <X size={20} />
+                  </button>
                 </div>
                 
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    className="w-full p-2 border rounded-md"
-                    placeholder="Brief description about this bookmark"
-                    rows="3"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <button
-                  type="submit"
-                  className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
-                >
-                  {editingBookmarkId !== null ? 'Update Bookmark' : 'Add Bookmark'}
-                </button>
-              </form>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2" htmlFor="title">
+                      Title
+                    </label>
+                    <input
+                      id="title"
+                      type="text"
+                      name="title"
+                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Website Title"
+                      required
+                      value={formData.title}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2" htmlFor="url">
+                      URL
+                    </label>
+                    <input
+                      id="url"
+                      type="text"
+                      name="url"
+                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="https://example.com"
+                      required
+                      value={formData.url}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2" htmlFor="category">
+                      Category
+                    </label>
+                    <select
+                      id="category"
+                      name="category"
+                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                    >
+                      {categories.map(category => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2" htmlFor="description">
+                      Description (Optional)
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Brief description about this bookmark"
+                      rows="3"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full bg-teal-600 text-white py-2 px-4 rounded-md hover:bg-teal-700 transition-colors flex items-center justify-center"
+                  >
+                    <Save className="mr-2" size={18} />
+                    {editingBookmarkId !== null ? 'Update Bookmark' : 'Add Bookmark'}
+                  </button>
+                </form>
+              </div>
             </div>
           )}
           
           {/* Bookmark List */}
           {filteredBookmarks.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredBookmarks.map((bookmark) => {
                 const domain = new URL(bookmark.url).hostname.replace('www.', '');
                 return (
                   <div
                     key={bookmark.id}
-                    className="bg-white p-4 rounded-2xl shadow-md transition hover:shadow-lg group cursor-pointer relative"
+                    className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md hover:shadow-lg transition-all group cursor-pointer relative"
                     onClick={() => window.open(bookmark.url, '_blank')}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={`https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=32`}
-                          alt="favicon"
-                          className="w-5 h-5"
-                        />
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(bookmark);
+                        }}
+                        title="Edit bookmark"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(bookmark.id);
+                        }}
+                        title="Delete bookmark"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mb-3">
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${bookmark.url}&sz=32`}
+                        alt="favicon"
+                        className="w-8 h-8 rounded-md"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWdsb2JlIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxsaW5lIHgxPSIyIiB5MT0iMTIiIHgyPSIyMiIgeTI9IjEyIi8+PHBhdGggZD0iTTEyIDJhMTUuMyAxNS4zIDAgMCAxIDQgMTAgMTUuMyAxNS4zIDAgMCAxLTQgMTAgMTUuMyAxNS4zIDAgMCAxLTQtMTAgMTUuMyAxNS4zIDAgMCAxIDQtMTB6Ii8+PC9zdmc+';
+                        }}
+                      />
+                      <div>
                         <h3
-                          className="text-base font-semibold text-gray-800 truncate max-w-[180px]"
+                          className="text-base font-semibold text-gray-800 dark:text-white truncate max-w-[230px]"
                           title={bookmark.title}
                         >
                           {bookmark.title}
                         </h3>
-                      </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                        <button
-                          className="text-gray-500 hover:text-gray-700 z-10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(bookmark);
-                          }}
+                        <p
+                          className="text-sm text-gray-500 dark:text-gray-400 truncate"
+                          title={bookmark.url}
                         >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          className="text-red-500 hover:text-red-700 z-10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(bookmark.id);
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                          {domain}
+                        </p>
                       </div>
                     </div>
 
-                    <p
-                      className="text-sm text-gray-500 mt-1 truncate"
-                      title={bookmark.url}
-                    >
-                      {domain}
-                    </p>
-
                     {bookmark.description && (
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-2 mb-3">
                         {bookmark.description}
                       </p>
                     )}
 
-                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-                      <span className="bg-gray-100 text-gray-700 py-1 px-2 rounded-full text-xs">
+                    <div className="flex justify-between items-center mt-auto pt-2 border-t border-gray-100 dark:border-gray-700 text-xs">
+                      <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-1 px-2 rounded-full">
                         {bookmark.category}
                       </span>
-                      <span>
+                      <span className="text-gray-500 dark:text-gray-400 flex items-center">
+                        <ExternalLink size={12} className="mr-1" />
                         {new Date(bookmark.dateAdded).toLocaleDateString(undefined, {
                           year: 'numeric',
                           month: 'short',
@@ -483,12 +560,21 @@ export default function BookmarkApp() {
               })}
             </div>
           ) : (
-            <div className="text-center py-10">
-              <p className="text-gray-500">
+            <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+              <Bookmark size={48} className="mx-auto text-gray-400 dark:text-gray-600 mb-4" />
+              <p className="text-gray-500 dark:text-gray-400 text-lg">
                 {currentUser 
                   ? "No bookmarks found. Add a new bookmark to get started!" 
                   : "Sign in to see your bookmarks or add new ones."}
               </p>
+              {currentUser && (
+                <button 
+                  className="mt-4 bg-teal-600 text-white py-2 px-6 rounded-md flex items-center mx-auto hover:bg-teal-700 transition-colors"
+                  onClick={() => setIsAddingBookmark(true)}
+                >
+                  <Plus size={18} className="mr-1" /> Add Your First Bookmark
+                </button>
+              )}
             </div>
           )}
         </main>
