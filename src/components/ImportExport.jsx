@@ -22,6 +22,7 @@ export default function ImportExport({ bookmarks, categories, onImportComplete, 
   const [exportFormat, setExportFormat] = useState('html');
   const [importError, setImportError] = useState('');
   const [importSuccess, setImportSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState('export'); // Default to export tab
   
   // Handle export
   const handleExport = () => {
@@ -201,109 +202,184 @@ export default function ImportExport({ bookmarks, categories, onImportComplete, 
     );
   }
   
-  // Adjust styling based on whether component is in a modal
-  const containerClass = inModal ? "flex flex-col gap-4" : "grid grid-cols-1 gap-8 mb-6";
-  
+  // Use a tabbed interface for a cleaner UX in the modal
   return (
-    <div className={containerClass}>
-      <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Import & Export</h2>
+    <div className="w-full">
+      {!inModal && <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Import & Export</h2>}
       
-      {/* Export Section */}
-      <div className="mb-6">
-        {!inModal && <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">Export Bookmarks</h3>}
-        <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Format</label>
-            <select 
-              className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600"
-              value={exportFormat}
-              onChange={(e) => setExportFormat(e.target.value)}
-            >
-              <option value="html">HTML (Browser Compatible)</option>
-              <option value="json">JSON</option>
-              <option value="csv">CSV</option>
-            </select>
-          </div>
-          <div className="flex items-end">
-            <button 
-              onClick={handleExport}
-              disabled={isExporting || !bookmarks.length}
-              className={`flex items-center justify-center px-4 py-2 rounded-md text-white ${
-                bookmarks.length ? 'bg-teal-600 hover:bg-teal-700' : 'bg-gray-400 cursor-not-allowed'
-              } transition-colors`}
-            >
-              {isExporting ? (
-                <Loader className="animate-spin mr-2" size={18} />
-              ) : (
-                <Download className="mr-2" size={18} />
-              )}
-              Export {bookmarks.length ? `(${bookmarks.length})` : ''}
-            </button>
-          </div>
-        </div>
-        {!bookmarks.length && (
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            You have no bookmarks to export.
-          </p>
-        )}
+      {/* Tab Navigation */}
+      <div className="flex mb-4 border-b border-gray-200 dark:border-gray-700">
+        <button
+          className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === 'export' 
+            ? 'text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400' 
+            : 'text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400'}`}
+          onClick={() => setActiveTab('export')}
+        >
+          <Download size={16} className="inline mr-2" />
+          Export
+        </button>
+        <button
+          className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === 'import' 
+            ? 'text-teal-600 dark:text-teal-400 border-b-2 border-teal-600 dark:border-teal-400' 
+            : 'text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400'}`}
+          onClick={() => setActiveTab('import')}
+        >
+          <Upload size={16} className="inline mr-2" />
+          Import
+        </button>
       </div>
       
-      {/* Import Section */}
-      <div>
-        {!inModal && <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">Import Bookmarks</h3>}
-        <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Format</label>
-            <select 
-              className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600"
-              value={importFormat}
-              onChange={(e) => setImportFormat(e.target.value)}
-            >
-              <option value="html">HTML (Browser Export)</option>
-              <option value="json">JSON</option>
-              <option value="csv">CSV</option>
-            </select>
+      {/* Export Tab Content */}
+      {activeTab === 'export' && (
+        <div className="py-2">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Format</label>
+            <div className="flex gap-3">
+              {['html', 'json', 'csv'].map((format) => (
+                <label key={format} className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    className="form-radio h-4 w-4 text-teal-600 transition duration-150 ease-in-out"
+                    checked={exportFormat === format}
+                    onChange={() => setExportFormat(format)}
+                  />
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    {format.toUpperCase()}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              {exportFormat === 'html' ? 'Compatible with most web browsers' : 
+               exportFormat === 'json' ? 'For developers or advanced users' : 
+               'Compatible with spreadsheet applications'}
+            </p>
           </div>
-          <div className="flex items-end">
-            <label className={`flex items-center justify-center px-4 py-2 rounded-md text-white ${
-              isImporting ? 'bg-gray-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700 cursor-pointer'
-            } transition-colors`}>
-              {isImporting ? (
+          
+          <button 
+            onClick={handleExport}
+            disabled={isExporting || !bookmarks.length}
+            className={`w-full flex items-center justify-center px-4 py-3 rounded-md text-white ${
+              bookmarks.length ? 'bg-teal-600 hover:bg-teal-700' : 'bg-gray-400 cursor-not-allowed'
+            } transition-colors shadow-sm`}
+          >
+            {isExporting ? (
+              <>
                 <Loader className="animate-spin mr-2" size={18} />
-              ) : (
-                <Upload className="mr-2" size={18} />
-              )}
-              Import
-              <input 
-                type="file" 
-                accept={`.${importFormat}, ${importFormat === 'html' ? 'text/html' : importFormat === 'json' ? 'application/json' : 'text/csv'}`}
-                className="hidden"
-                onChange={handleImportFile}
-                disabled={isImporting}
-              />
-            </label>
-          </div>
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2" size={18} />
+                Export {bookmarks.length ? `${bookmarks.length} Bookmarks` : ''}
+              </>
+            )}
+          </button>
+          
+          {!bookmarks.length && (
+            <p className="mt-4 text-sm text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-md border border-gray-200 dark:border-gray-700">
+              You have no bookmarks to export
+            </p>
+          )}
         </div>
-        
-        <div className="mt-3">
+      )}
+      
+      {/* Import Tab Content */}
+      {activeTab === 'import' && (
+        <div className="py-2">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Format</label>
+            <div className="flex gap-3">
+              {['html', 'json', 'csv'].map((format) => (
+                <label key={format} className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    className="form-radio h-4 w-4 text-teal-600 transition duration-150 ease-in-out"
+                    checked={importFormat === format}
+                    onChange={() => setImportFormat(format)}
+                  />
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    {format.toUpperCase()}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              {importFormat === 'html' ? 'Import from browser bookmarks export' : 
+               importFormat === 'json' ? 'Import from JSON format' : 
+               'Import from CSV spreadsheet format'}
+            </p>
+          </div>
+          
+          <label 
+            className={`w-full flex flex-col items-center justify-center p-6 border-2 border-dashed 
+              ${isImporting ? 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 cursor-not-allowed' : 
+              'border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-900/20 cursor-pointer hover:bg-teal-100 dark:hover:bg-teal-900/30'} 
+              rounded-lg transition-colors`}
+          >
+            {isImporting ? (
+              <>
+                <Loader className="animate-spin mb-2" size={24} />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Importing...</span>
+              </>
+            ) : (
+              <>
+                <Upload size={24} className="mb-2 text-teal-600 dark:text-teal-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Drag & drop your file here or click to browse</span>
+                <span className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Accepts {importFormat.toUpperCase()} files
+                </span>
+              </>
+            )}
+            <input 
+              type="file" 
+              accept={`.${importFormat}, ${importFormat === 'html' ? 'text/html' : importFormat === 'json' ? 'application/json' : 'text/csv'}`}
+              className="hidden"
+              onChange={handleImportFile}
+              disabled={isImporting}
+            />
+          </label>
+          
+          {/* Status Messages */}
+          <div className="mt-4">
           {importError && (
-            <div className="bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-3 rounded-md text-sm">
-              {importError}
+            <div className="bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-3 rounded-md text-sm animate-fade-in">
+              <div className="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span>{importError}</span>
+              </div>
             </div>
           )}
           
           {importSuccess && (
-            <div className="bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 p-3 rounded-md text-sm">
-              {importSuccess}
+            <div className="bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 p-3 rounded-md text-sm animate-fade-in">
+              <div className="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>{importSuccess}</span>
+              </div>
             </div>
           )}
+          </div>
           
-          <div className="mt-3 flex items-center text-sm text-gray-500 dark:text-gray-400">
-            <FileText size={16} className="mr-2" />
-            <span>Supported formats: HTML exports from browsers, JSON, and CSV</span>
+          {/* Help Text */}
+          <div className="mt-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+            <FileText size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
+            Tips for importing
+          </h4>
+          <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1 ml-6 list-disc">
+            <li>HTML: Export bookmarks from your browser first</li>
+            <li>JSON: Use for transferring between WebCity accounts</li>
+            <li>CSV: Use comma-separated values with URL, title, and description columns</li>
+            <li>Duplicate bookmarks will be automatically skipped</li>
+          </ul>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
