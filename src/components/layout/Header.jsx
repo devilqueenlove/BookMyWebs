@@ -1,4 +1,4 @@
-import { Search, LogOut, User, Moon, Sun, Menu } from 'lucide-react';
+import { Search, LogOut, User, Moon, Sun, Menu, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -8,7 +8,8 @@ export default function Header({
   setShowAuthModal, 
   isMobileMenuOpen, 
   setIsMobileMenuOpen,
-  currentUser 
+  currentUser,
+  onSettings 
 }) {
   const { logout } = useAuth();
   const { toggleTheme, isDark } = useTheme();
@@ -71,6 +72,14 @@ export default function Header({
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDark ? <Sun size={20} className="text-yellow-300" /> : <Moon size={20} />}
+          </button>
+          
+          <button 
+            onClick={onSettings}
+            className="p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+            title="Settings"
+          >
+            <Settings size={20} />
           </button>
           
           {currentUser ? (

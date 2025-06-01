@@ -14,7 +14,7 @@ import {
 } from '../utils/bookmarkConverter';
 import { Download, Upload, FileText, Loader } from 'lucide-react';
 
-export default function ImportExport({ bookmarks, categories, onImportComplete }) {
+export default function ImportExport({ bookmarks, categories, onImportComplete, inModal = false }) {
   const { currentUser } = useAuth();
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -201,13 +201,16 @@ export default function ImportExport({ bookmarks, categories, onImportComplete }
     );
   }
   
+  // Adjust styling based on whether component is in a modal
+  const containerClass = inModal ? "flex flex-col gap-4" : "grid grid-cols-1 gap-8 mb-6";
+  
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+    <div className={containerClass}>
       <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Import & Export</h2>
       
       {/* Export Section */}
       <div className="mb-6">
-        <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">Export Bookmarks</h3>
+        {!inModal && <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">Export Bookmarks</h3>}
         <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Format</label>
@@ -247,7 +250,7 @@ export default function ImportExport({ bookmarks, categories, onImportComplete }
       
       {/* Import Section */}
       <div>
-        <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">Import Bookmarks</h3>
+        {!inModal && <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-200">Import Bookmarks</h3>}
         <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Format</label>

@@ -22,6 +22,7 @@ import BookmarkList from './components/bookmarks/BookmarkList';
 import BookmarkForm from './components/bookmarks/BookmarkForm';
 import AuthModal from './components/auth/AuthModal';
 import ImportExport from './components/ImportExport';
+import SettingsModal from './components/SettingsModal';
 
 // Main App Component
 export default function BookmarkApp() {
@@ -38,6 +39,8 @@ export default function BookmarkApp() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Fetch bookmarks from Firestore when user logs in
   useEffect(() => {
@@ -193,6 +196,85 @@ export default function BookmarkApp() {
     }
   };
 
+  // Auto-categorize bookmarks based on their URLs
+  const autoCategorize = async () => {
+    if (!currentUser || bookmarks.length === 0) return;
+    
+    setIsProcessing(true);
+    try {
+      // Import the categorization utility
+      const { categorizeUrl } = await import('./utils/categorizeUrl');
+      
+      // Track which bookmarks need updating
+      const bookmarksToUpdate = [];
+      
+      // Process each bookmark
+      bookmarks.forEach(bookmark => {
+        // Skip bookmarks with user-defined categories (not 'Uncategorized')
+        if (bookmark.category && bookmark.category !== 'Uncategorized') return;
+        
+        // Get suggested category
+        const suggestedCategory = categorizeUrl(bookmark.url, bookmark.title, bookmark.description);
+        
+        // Add to update list if a category was suggested
+        if (suggestedCategory && suggestedCategory !== 'Uncategorized') {
+          bookmarksToUpdate.push({
+            id: bookmark.id,
+            suggestedCategory
+          });
+        }
+      });
+      
+      // Update categories in Firestore
+      if (bookmarksToUpdate.length > 0) {
+        // Add any new categories to the categories list
+        const newCategories = [...categories];
+        bookmarksToUpdate.forEach(bookmark => {
+          if (!newCategories.includes(bookmark.suggestedCategory)) {
+            newCategories.push(bookmark.suggestedCategory);
+          }
+        });
+        
+        // Update categories in state if new ones were added
+        if (newCategories.length > categories.length) {
+          setCategories(newCategories);
+          
+          // Update categories in Firestore
+          const userCategoriesRef = collection(db, 'categories');
+          const categoriesQuery = query(userCategoriesRef, where("userId", "==", currentUser.uid));
+          const categoriesSnapshot = await getDocs(categoriesQuery);
+          
+          if (categoriesSnapshot.empty) {
+            // Create new categories document
+            await addDoc(userCategoriesRef, {
+              userId: currentUser.uid,
+              categories: newCategories
+            });
+          } else {
+            // Update existing categories
+            await updateDoc(categoriesSnapshot.docs[0].ref, {
+              categories: newCategories
+            });
+          }
+        }
+        
+        // Update each bookmark with its new category
+        for (const bookmark of bookmarksToUpdate) {
+          const bookmarkRef = doc(db, "bookmarks", bookmark.id);
+          await updateDoc(bookmarkRef, { category: bookmark.suggestedCategory });
+        }
+      }
+      
+      alert(`Auto-categorization complete! ${bookmarksToUpdate.length} bookmarks were categorized.`);
+    } catch (error) {
+      console.error('Error during auto-categorization:', error);
+      alert('An error occurred during auto-categorization. Please try again.');
+    } finally {
+      setIsProcessing(false);
+      setShowSettings(false);
+    }
+  };
+
   return (
     <div className={`min-h-screen ${isDark ? 'dark' : ''}`}>
       <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -203,6 +285,7 @@ export default function BookmarkApp() {
           currentUser={currentUser}
           isMobileMenuOpen={isMobileMenuOpen}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
+          onSettings={() => setShowSettings(true)}
         />
         
         <div className="flex flex-1 overflow-hidden">
@@ -321,6 +404,16 @@ export default function BookmarkApp() {
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
+        />
+        
+        {/* Settings Modal */}
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          onAutoCategorize={autoCategorize}
+          isProcessing={isProcessing}
+          bookmarks={bookmarks}
+          categories={categories}
         />
       </div>
     </div>
