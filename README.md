@@ -1,39 +1,41 @@
-# WebCity - Modern Bookmark Manager
+# BookMyWebs - Modern Bookmark Manager
 
-![WebCity Banner](https://github.com/devilqueenlove/BookMyWebs/raw/main/public/banner.png)
+![BookMyWebs Banner](https://github.com/devilqueenlove/BookMyWebs/raw/main/public/banner.png)
 
 ## Overview
 
-WebCity is a modern, feature-rich bookmark manager designed to help you organize and access your web bookmarks from anywhere. Built with React, Vite, and Tailwind CSS, it offers a beautiful, responsive UI with dynamic theming, Firebase authentication, and cloud sync capabilities.
+BookMyWebs is a modern, feature-rich bookmark manager designed to help you organize and access your web bookmarks from anywhere. Built with React, Vite, and Tailwind CSS, it offers a beautiful, responsive UI with dynamic theming, Firebase authentication, and cloud sync capabilities.
 
 ## Features
 
 ### Core Features
-- Bookmark Management: Add, edit, delete, and organize bookmarks with ease
-- Search & Filter: Quickly find bookmarks by title, URL, or description
-- Category Organization: Organize bookmarks into customizable categories
-- Multiple View Modes: Toggle between grid and list views for your bookmarks
-- Dynamic Theming: Light/dark mode and customizable accent colors
-- Cloud Sync: Firebase-powered data synchronization across devices
-- User Authentication: Secure login with email/password and Google authentication
-- Responsive Design: Works beautifully on all devices from mobile to desktop
+- **Bookmark Management**: Add, edit, delete, and organize bookmarks with ease
+- **Search & Filter**: Quickly find bookmarks by title, URL, or description
+- **Category Organization**: Organize bookmarks into customizable categories
+- **Multiple View Modes**: Toggle between grid and list views for your bookmarks
+- **Dynamic Theming**: Light/dark mode and customizable accent colors
+- **Cloud Sync**: Firebase-powered data synchronization across devices
+- **User Authentication**: Secure login with email/password and Google authentication
+- **Responsive Design**: Works beautifully on all devices from mobile to desktop
 
 ### UI/UX Features
-- Modern Interface: Clean, intuitive design with attention to detail
-- Fast Performance: Built with React and optimized for speed
-- Card & List Views: Multiple ways to visualize your bookmarks
-- Smart Favicon Detection: Automatically fetches website icons
-- Rich Text Formatting: Support for descriptions and notes
-- Stats Dashboard: View usage statistics at a glance
+- **Modern Interface**: Clean, intuitive design with attention to detail
+- **Fast Performance**: Built with React and optimized for speed
+- **Card & List Views**: Multiple ways to visualize your bookmarks
+- **Smart Favicon Detection**: Automatically fetches website icons
+- **Rich Text Formatting**: Support for descriptions and notes
+- **Automatic Categorization**: Smart categorization of bookmarks based on URL patterns
+- **Import/Export**: Backup and restore your bookmark collection
+- **Settings Panel**: Customize your experience with various preferences
 
 ## Technologies Used
 
-- Frontend: React.js, Vite, Tailwind CSS
-- Backend: Firebase (Authentication & Firestore)
-- State Management: React Context API
-- Styling: Tailwind CSS with CSS variables for theming
-- Icons: Lucide React
-- Package Management: npm
+- **Frontend**: React.js, Vite, Tailwind CSS
+- **Backend**: Firebase (Authentication & Firestore)
+- **State Management**: React Context API
+- **Styling**: Tailwind CSS with CSS variables for theming
+- **Icons**: Lucide React
+- **Package Management**: npm
 
 ## Getting Started
 
@@ -47,7 +49,7 @@ WebCity is a modern, feature-rich bookmark manager designed to help you organize
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/BookMyWebs.git
+   git clone https://github.com/devilqueenlove/BookMyWebs.git
    cd BookMyWebs
    ```
 
@@ -58,7 +60,7 @@ WebCity is a modern, feature-rich bookmark manager designed to help you organize
 
 3. Set up Firebase
    - Create a Firebase project at [firebase.google.com](https://firebase.google.com)
-   - Enable Email/Password and Google authentication
+   - Enable Email/Password and Google authentication in the Authentication section
    - Set up Firestore database with appropriate security rules
    - Create a `src/firebase/config.js` file with your Firebase configuration:
 
@@ -96,14 +98,13 @@ WebCity is a modern, feature-rich bookmark manager designed to help you organize
 ```
 /src
   /components
-    /auth        # Authentication components
-    /bookmarks   # Bookmark-related components
-    /layout      # Layout components (Header, Sidebar, etc.)
+    /auth        # Authentication components (Login, Signup, AuthModal)
+    /bookmarks   # Bookmark-related components (BookmarkForm, BookmarkList)
+    /layout      # Layout components (Header, Sidebar)
     /ui          # Reusable UI components
-  /context      # React Context providers
+  /contexts     # React Context providers (AuthContext, ThemeContext)
   /firebase     # Firebase configuration
-  /hooks        # Custom React hooks
-  /utils        # Utility functions
+  /utils        # Utility functions including bookmark categorization
   App.jsx       # Main application component
   main.jsx      # Entry point
 ```
@@ -136,12 +137,60 @@ WebCity is a modern, feature-rich bookmark manager designed to help you organize
 
 ### Recent Changes
 
-#### Theme Color Integration Enhancement (v0.4.1)
-- Extended dynamic theme color application across all UI components
-- Updated Sidebar, Header, BookmarkApp, and BookmarkList to use theme variables
-- Improved visual consistency with accent color application
-- Enhanced hover and active states for buttons and interactive elements
-- Replaced hardcoded colors with CSS variables for better maintainability
+#### Firebase Authentication Implementation (v0.5.0)
+- Integrated Firebase Authentication with email/password and Google login
+- Created AuthContext for managing authentication state
+- Implemented Login and Signup components with form validation
+- Built AuthModal for toggling between login/signup views
+- Replaced localStorage with Firestore for bookmark and category storage
+- Added real-time data synchronization with Firestore
+
+#### Auto-Categorization Feature (v0.5.1)
+- Added automatic categorization of bookmarks based on URL patterns
+- Implemented utilities for intelligent category suggestion
+- Added bulk categorization feature in settings panel
+
+## Authentication and Data Management
+
+### Firebase Authentication
+BookMyWebs implements secure user authentication through Firebase, offering:
+- Email/password authentication with validation
+- One-click Google account login
+- Password reset functionality
+- Persistent login sessions
+- Protected routes for authenticated users
+
+### Firestore Database Integration
+- Real-time data synchronization across devices
+- Secure data storage with proper authentication rules
+- Cloud backup of all bookmarks and categories
+- Optimized queries for fast performance
+
+## Setting Up Firebase Authentication
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project or select an existing one
+3. Navigate to Authentication section and enable:
+   - Email/Password provider
+   - Google provider
+4. Set up Firestore Database:
+   - Create a new database in production mode
+   - Configure security rules to secure your data
+
+Example Firestore security rules:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /bookmarks/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    match /categories/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+  }
+}
+```
 
 ## Roadmap
 
@@ -156,17 +205,29 @@ WebCity is a modern, feature-rich bookmark manager designed to help you organize
    - Drag & drop sorting and reordering
    - Nested categories/folders
    - Tagging system with multiple tags per bookmark
+   - Improved auto-categorization with machine learning
 
-3. Import/Export
-   - Support for Chrome, Firefox, Safari bookmark formats
-   - Export to JSON, HTML, CSV for backup
-   - Migration tools from other bookmark services
+3. Social Features
+   - Bookmark sharing with friends
+   - Collaborative bookmark collections
+   - Public/private bookmark lists
+   - Follow other users' public collections
 
 4. Advanced Features
    - Offline support & sync queue
    - Bookmark previews (screenshots)
    - Advanced search with filters
    - Bookmark analytics and suggestions
+   - Browser history integration
+
+## How to Use
+
+1. **Sign Up/Login**: Create an account or sign in with Google
+2. **Add Bookmarks**: Click the "+" button to add new web bookmarks
+3. **Organize**: Create categories and assign bookmarks to them
+4. **Search & Filter**: Use the search bar or category filters to find bookmarks
+5. **Customize**: Change theme and appearance in settings
+6. **Import/Export**: Backup your bookmarks or import from other sources
 
 ## Contributing
 
