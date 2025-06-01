@@ -316,8 +316,8 @@ export default function BookmarkApp() {
   }, []);
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'dark' : ''}`}>
-      <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-background">
+      <div className="flex flex-col min-h-screen bg-background text-foreground">
         <Header 
           searchQuery={searchQuery} 
           setSearchQuery={setSearchQuery} 
@@ -340,18 +340,18 @@ export default function BookmarkApp() {
             />
           </div>
           
-          <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
+          <main className="flex-1 overflow-y-auto bg-background p-4 md:p-6">
             {/* Hero section for category display */}
             {showHero && (
               <div 
-                className="hero-section bg-gradient-to-r from-teal-500 to-teal-600 dark:from-teal-700 dark:to-teal-800 rounded-xl shadow-lg mb-6 p-6 relative overflow-hidden animate-fadeIn" 
+                className="hero-section bg-gradient-to-r from-accent to-accent-2 rounded-xl shadow-lg mb-6 p-6 relative overflow-hidden animate-fadeIn" 
                 style={{ 
                   animation: showHero ? 'fadeIn 0.5s ease-in-out' : 'fadeOut 0.5s ease-in-out'
                 }}
               >
                 {/* Dismiss button */}
                 <button 
-                  className="absolute top-3 right-3 z-30 bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 transition-all hover:rotate-90 transform duration-300"
+                  className="absolute top-3 right-3 z-30 bg-accent-foreground/20 hover:bg-accent-foreground/30 text-accent-foreground rounded-full p-1.5 transition-all hover:rotate-90 transform duration-300"
                   onClick={() => {
                     // Create the fadeout animation effect
                     const heroElement = document.querySelector('.hero-section');
@@ -393,97 +393,63 @@ export default function BookmarkApp() {
             {/* Action bar */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
               {/* Left side - Search */}
-              <div className="relative w-full md:w-auto md:flex-1 max-w-md">
+              <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search in current view..."
-                  className="w-full py-2 pl-10 pr-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  placeholder="Search by title, URL, or description..."
+                  className="w-full py-2 pl-10 pr-10 rounded-lg bg-card border border-accent/20 focus:outline-none focus:ring-2 focus:ring-accent text-card-foreground"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <SearchIcon size={18} className="absolute left-3 top-2.5 text-gray-400" />
+                <SearchIcon size={18} className="absolute left-3 top-2.5 text-accent/60" />
                 {searchQuery && (
                   <button 
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    className="absolute right-3 top-2.5 text-accent/60 hover:text-accent"
                   >
                     <X size={16} />
                   </button>
                 )}
               </div>
               
-              {/* Right side - Actions */}
-              <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-                {/* View toggle */}
-                <div className="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                  <button
-                    className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
-                    onClick={() => setViewMode('grid')}
-                    title="Grid view"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="3" width="7" height="7" />
-                      <rect x="14" y="3" width="7" height="7" />
-                      <rect x="3" y="14" width="7" height="7" />
-                      <rect x="14" y="14" width="7" height="7" />
-                    </svg>
-                  </button>
-                  <button
-                    className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
-                    onClick={() => setViewMode('list')}
-                    title="List view"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="8" y1="6" x2="21" y2="6" />
-                      <line x1="8" y1="12" x2="21" y2="12" />
-                      <line x1="8" y1="18" x2="21" y2="18" />
-                      <line x1="3" y1="6" x2="3.01" y2="6" />
-                      <line x1="3" y1="12" x2="3.01" y2="12" />
-                      <line x1="3" y1="18" x2="3.01" y2="18" />
-                    </svg>
-                  </button>
-                </div>
-                
-                <button 
-                  className="bg-teal-600 text-white py-2 px-3 md:px-4 rounded-lg flex items-center hover:bg-teal-700 transition-colors text-sm md:text-base shadow-sm"
-                  onClick={() => {
-                    if (!currentUser) {
-                      setShowAuthModal(true);
-                      return;
-                    }
-                    setIsAddingBookmark(true);
-                    setEditingBookmarkId(null);
-                  }}
-                >
-                  <PlusCircle size={18} className="mr-2" /> Add Bookmark
-                </button>
-              </div>
+              <button 
+                className="bg-button text-accent-foreground py-2 px-3 md:px-4 rounded-lg flex items-center hover:bg-button-hover transition-colors text-sm md:text-base shadow-sm"
+                onClick={() => {
+                  if (!currentUser) {
+                    setShowAuthModal(true);
+                    return;
+                  }
+                  setIsAddingBookmark(true);
+                  setEditingBookmarkId(null);
+                }}
+              >
+                <PlusCircle size={18} className="mr-2" /> Add Bookmark
+              </button>
             </div>
             
             {/* Auth Message for Non-Logged-In Users */}
             {!currentUser && bookmarks.length === 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden my-6">
+              <div className="bg-card rounded-xl shadow-md overflow-hidden my-6">
                 <div className="md:flex">
-                  <div className="md:shrink-0 bg-gradient-to-br from-teal-500 to-blue-600 p-6 md:p-8 flex items-center justify-center">
-                    <BookOpen size={80} className="text-white opacity-75" />
+                  <div className="md:shrink-0 bg-gradient-to-br from-accent to-accent-2 p-6 md:p-8 flex items-center justify-center">
+                    <BookOpen size={80} className="text-accent-foreground opacity-75" />
                   </div>
                   <div className="p-6 md:p-8 text-center md:text-left">
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                      Welcome to WebCity!
+                    <h3 className="text-xl md:text-2xl font-bold text-card-foreground mb-2">
+                      Welcome to WebCity
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl">
-                      Your personal web bookmark manager. Save, organize, and access your favorite websites from anywhere. 
-                      Sign in to save bookmarks securely across all your devices.
+                    <p className="text-card-foreground/70 mb-6">
+                      Your personal bookmark manager that helps you organize your web adventures.
                     </p>
-                    <div className="space-x-4">
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
                       <button 
-                        className="px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-medium rounded-lg shadow-sm transition-all transform hover:scale-105"
+                        className="px-6 py-3 bg-button text-accent-foreground font-medium rounded-lg hover:bg-button-hover shadow-sm transition-all"
                         onClick={() => setShowAuthModal(true)}
                       >
                         Sign in to Get Started
                       </button>
                       <button 
-                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all"
+                        className="px-6 py-3 border border-accent/20 text-card-foreground font-medium rounded-lg hover:bg-accent/5 shadow-sm transition-all"
                         onClick={() => {
                           // Allow non-logged in users to try the app
                           setIsAddingBookmark(true);
@@ -492,7 +458,7 @@ export default function BookmarkApp() {
                         Try it out
                       </button>
                     </div>
-                    <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="mt-4 text-sm text-card-foreground/60">
                       No account required to try. Your bookmarks will be saved locally.
                     </div>
                   </div>
@@ -503,21 +469,21 @@ export default function BookmarkApp() {
             {/* Stats cards - visible when user has bookmarks */}
             {currentUser && bookmarks.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border-l-4 border-teal-500">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Total Bookmarks</div>
-                  <div className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{bookmarks.length}</div>
+                <div className="bg-card rounded-lg shadow-sm p-4 border-l-4 border-accent">
+                  <div className="text-sm text-card-foreground/60">Total Bookmarks</div>
+                  <div className="text-2xl font-bold text-card-foreground mt-1">{bookmarks.length}</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border-l-4 border-purple-500">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Categories</div>
-                  <div className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{categories.length}</div>
+                <div className="bg-card rounded-lg shadow-sm p-4 border-l-4 border-accent-2">
+                  <div className="text-sm text-card-foreground/60">Categories</div>
+                  <div className="text-2xl font-bold text-card-foreground mt-1">{categories.length}</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border-l-4 border-amber-500">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">In Current Category</div>
-                  <div className="text-2xl font-bold text-gray-800 dark:text-white mt-1">{filteredBookmarks.length}</div>
+                <div className="bg-card rounded-lg shadow-sm p-4 border-l-4 border-accent-3">
+                  <div className="text-sm text-card-foreground/60">In Current Category</div>
+                  <div className="text-2xl font-bold text-card-foreground mt-1">{filteredBookmarks.length}</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border-l-4 border-blue-500">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Recent Activity</div>
-                  <div className="text-2xl font-bold text-gray-800 dark:text-white mt-1">Today</div>
+                <div className="bg-card rounded-lg shadow-sm p-4 border-l-4 border-accent/80">
+                  <div className="text-sm text-card-foreground/60">Recent Activity</div>
+                  <div className="text-2xl font-bold text-card-foreground mt-1">Today</div>
                 </div>
               </div>
             )}

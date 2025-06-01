@@ -40,23 +40,23 @@ export default function BookmarkList({
 
   if (bookmarks.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-10 text-center max-w-md mx-auto">
+      <div className="bg-card rounded-lg shadow-sm p-10 text-center max-w-md mx-auto">
         <div className="flex justify-center mb-4">
           {searchQuery ? (
-            <SearchIcon size={40} className="text-gray-300 dark:text-gray-600" />
+            <SearchIcon size={40} className="text-accent/30" />
           ) : activeCategory !== 'All' ? (
-            <FolderIcon size={40} className="text-gray-300 dark:text-gray-600" />
+            <FolderIcon size={40} className="text-accent/30" />
           ) : (
-            <BookmarkIcon size={40} className="text-gray-300 dark:text-gray-600" />
+            <BookmarkIcon size={40} className="text-accent/30" />
           )}
         </div>
-        <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">No bookmarks found</h3>
+        <h3 className="text-lg font-medium text-card-foreground mb-2">No bookmarks found</h3>
         {searchQuery ? (
-          <p className="text-gray-500 dark:text-gray-400">Try adjusting your search query or try another category.</p>
+          <p className="text-card-foreground/60">Try adjusting your search query or try another category.</p>
         ) : activeCategory !== 'All' ? (
-          <p className="text-gray-500 dark:text-gray-400">This category is empty. Add a bookmark or select another category.</p>
+          <p className="text-card-foreground/60">This category is empty. Add a bookmark or select another category.</p>
         ) : (
-          <p className="text-gray-500 dark:text-gray-400">Add your first bookmark to get started with WebCity.</p>
+          <p className="text-card-foreground/60">Add your first bookmark to get started with WebCity.</p>
         )}
       </div>
     );
@@ -76,7 +76,7 @@ export default function BookmarkList({
       {bookmarks.map(bookmark => (
         <div 
           key={bookmark.id} 
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all group relative border border-transparent hover:border-gray-200 dark:hover:border-gray-700 overflow-hidden"
+          className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all group relative border border-transparent hover:border-accent/20 overflow-hidden"
         >
           {/* Top decorative bar - different color based on category */}
           <div className={`h-1.5 w-full ${getCategoryColor(bookmark.category)}`}></div>
@@ -90,7 +90,7 @@ export default function BookmarkList({
                   e.preventDefault();
                   onEdit(bookmark);
                 }}
-                className="p-1.5 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-teal-600 dark:text-gray-400 dark:hover:text-teal-400 shadow-sm"
+                className="p-1.5 rounded-full bg-accent/5 text-card-foreground/70 hover:text-accent shadow-sm"
                 title="Edit bookmark"
               >
                 <Edit size={14} />
@@ -101,7 +101,7 @@ export default function BookmarkList({
                   e.preventDefault();
                   onDelete(bookmark.id);
                 }}
-                className="p-1.5 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 shadow-sm"
+                className="p-1.5 rounded-full bg-accent/5 text-card-foreground/70 hover:text-destructive shadow-sm"
                 title="Delete bookmark"
               >
                 <Trash2 size={14} />
@@ -117,7 +117,7 @@ export default function BookmarkList({
               {/* Header with favicon and title */}
               <div className="flex items-start">
                 <div className="mr-3 mt-1">
-                  <div className="w-8 h-8 flex items-center justify-center rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700">
+                  <div className="w-8 h-8 flex items-center justify-center rounded-md overflow-hidden bg-accent/5">
                     <img 
                       src={getFavicon(bookmark.url)} 
                       alt=""
@@ -130,10 +130,10 @@ export default function BookmarkList({
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-medium text-gray-800 dark:text-white text-base truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                  <h3 className="font-medium text-card-foreground text-base truncate group-hover:text-accent transition-colors">
                     {bookmark.title}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center mt-0.5">
+                  <p className="text-xs text-card-foreground/60 truncate flex items-center mt-0.5">
                     <LinkIcon size={12} className="inline mr-1 flex-shrink-0" />
                     {bookmark.url.replace(/^https?:\/\//, '').replace(/^www\./, '')}
                   </p>
@@ -143,19 +143,19 @@ export default function BookmarkList({
               {/* Description with fade-out effect */}
               {bookmark.description && (
                 <div className="mt-3 relative">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
+                  <p className="text-sm text-card-foreground/80 line-clamp-2 leading-relaxed">
                     {bookmark.description}
                   </p>
-                  <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white dark:from-gray-800 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-card to-transparent"></div>
                 </div>
               )}
               
               {/* Footer */}
-              <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <span className="text-xs py-1 px-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full truncate max-w-[130px] font-medium">
+              <div className="flex justify-between items-center mt-4 pt-3 border-t border-accent/10">
+                <span className="text-xs py-1 px-2 bg-accent/5 text-card-foreground/80 rounded-full truncate max-w-[130px] font-medium">
                   {bookmark.category || "Uncategorized"}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                <span className="text-xs text-card-foreground/60 flex items-center">
                   <Clock size={12} className="mr-1" />
                   {formatDate(bookmark.createdAt || new Date())}
                 </span>
@@ -173,7 +173,7 @@ export default function BookmarkList({
       {bookmarks.map(bookmark => (
         <div 
           key={bookmark.id} 
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all group relative border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+          className="bg-card rounded-lg shadow-sm hover:shadow-md transition-all group relative border border-transparent hover:border-accent/20"
         >
           <a 
             href={bookmark.url} 
@@ -183,7 +183,7 @@ export default function BookmarkList({
           >
             {/* Left: Favicon */}
             <div className="mr-3 flex-shrink-0">
-              <div className="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+              <div className="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden bg-accent/5">
                 <img 
                   src={getFavicon(bookmark.url)} 
                   alt=""
@@ -198,19 +198,19 @@ export default function BookmarkList({
             
             {/* Middle: Title and URL */}
             <div className="min-w-0 flex-1">
-              <h3 className="font-medium text-gray-800 dark:text-white truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+              <h3 className="font-medium text-card-foreground truncate group-hover:text-accent transition-colors">
                 {bookmark.title}
               </h3>
               <div className="flex flex-wrap items-center gap-x-4 mt-1">
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center">
+                <p className="text-xs text-card-foreground/60 truncate flex items-center">
                   <LinkIcon size={12} className="inline mr-1 flex-shrink-0" />
                   {bookmark.url.replace(/^https?:\/\//, '').replace(/^www\./, '')}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                <p className="text-xs text-card-foreground/60 flex items-center">
                   <Calendar size={12} className="mr-1" />
                   {formatDate(bookmark.createdAt || new Date())}
                 </p>
-                <span className="text-xs py-0.5 px-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full truncate max-w-[120px]">
+                <span className="text-xs py-0.5 px-2 bg-accent/5 text-card-foreground/80 rounded-full truncate max-w-[120px]">
                   {bookmark.category || "Uncategorized"}
                 </span>
               </div>
@@ -219,10 +219,10 @@ export default function BookmarkList({
             {/* Description tooltip on hover */}
             {bookmark.description && (
               <div className="relative ml-2 group hidden sm:block">
-                <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full bg-gray-100 dark:bg-gray-700">
+                <button className="p-2 text-card-foreground/60 hover:text-accent rounded-full bg-accent/5">
                   <Info size={14} />
                 </button>
-                <div className="absolute right-0 top-0 w-64 bg-white dark:bg-gray-800 rounded-lg p-3 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 transform translate-y-[-100%] text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                <div className="absolute right-0 top-0 w-64 bg-card rounded-lg p-3 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 transform translate-y-[-100%] text-sm text-card-foreground/80 border border-accent/20">
                   {bookmark.description}
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function BookmarkList({
                   e.preventDefault();
                   onEdit(bookmark);
                 }}
-                className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-teal-600 dark:text-gray-400 dark:hover:text-teal-400"
+                className="p-1.5 rounded-full bg-accent/5 text-card-foreground/70 hover:text-accent"
                 title="Edit bookmark"
               >
                 <Edit size={14} />
@@ -247,13 +247,13 @@ export default function BookmarkList({
                   e.preventDefault();
                   onDelete(bookmark.id);
                 }}
-                className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                className="p-1.5 rounded-full bg-accent/5 text-card-foreground/70 hover:text-destructive"
                 title="Delete bookmark"
               >
                 <Trash2 size={14} />
               </button>
               <button 
-                className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
+                className="p-1.5 rounded-full bg-accent/5 text-card-foreground/70 hover:text-accent-2"
                 title="Open link"
               >
                 <ExternalLink size={14} />

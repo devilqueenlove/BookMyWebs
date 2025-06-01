@@ -24,19 +24,19 @@ export default function Header({
   };
   
   return (
-    <header className="bg-gray-800 dark:bg-gray-900 text-white p-3 md:p-4 shadow-md">
+    <header className="bg-primary text-accent-foreground p-3 md:p-4 shadow-md">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <button
-            className="md:hidden mr-2 p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+            className="md:hidden mr-2 p-2 rounded-full hover:bg-primary-dark transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
             <Menu size={20} />
           </button>
           <h1 className="text-xl md:text-2xl font-bold flex items-center">
-            <div className="mr-2 text-teal-400">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bookmark"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            <div className="mr-2">
+              <img src="/logo.svg" alt="WebCity Logo" className="w-8 h-8" />
             </div>
             <span className="hidden sm:inline">WebCity</span>
             <span className="sm:hidden">WC</span>
@@ -48,18 +48,18 @@ export default function Header({
             <input
               type="text"
               placeholder="Search bookmarks..."
-              className="py-2 px-4 pr-10 rounded-lg text-gray-800 dark:text-white dark:bg-gray-700 dark:border-gray-600 w-64 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="py-2 px-4 pr-10 rounded-lg text-card-foreground bg-card border border-accent/20 w-64 focus:outline-none focus:ring-2 focus:ring-accent"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="absolute right-3 top-2.5 text-gray-500 dark:text-gray-400" size={20} />
+            <Search className="absolute right-3 top-2.5 text-accent/60" size={20} />
           </div>
           
           {/* Mobile search button */}
           <div className="md:hidden">
             <button 
               onClick={() => document.getElementById('mobileSearch').classList.toggle('hidden')}
-              className="p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+              className="p-2 rounded-full hover:bg-accent/20 transition-colors"
               aria-label="Search"
             >
               <Search size={20} />
@@ -68,18 +68,18 @@ export default function Header({
           
           <button 
             onClick={toggleTheme}
-            className="p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+            className="p-2 rounded-full hover:bg-accent/20 transition-colors"
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
-            {isDark ? <Sun size={20} className="text-yellow-300" /> : <Moon size={20} />}
+            {isDark ? <Sun size={20} className="text-accent-3" /> : <Moon size={20} className="text-accent-3" />}
           </button>
           
           <button 
             onClick={onSettings}
-            className="p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+            className="p-2 rounded-full hover:bg-accent/20 transition-colors"
             title="Settings"
           >
-            <Settings size={20} />
+            <Settings size={20} className="text-accent-3" />
           </button>
           
           {currentUser ? (
@@ -89,16 +89,17 @@ export default function Header({
               </span>
               <button 
                 onClick={handleLogout}
-                className="p-2 rounded-full hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
-                title="Log out"
+                className="flex items-center p-2 text-accent-foreground hover:bg-accent/20 rounded-lg transition-colors"
+                title="Logout"
               >
-                <LogOut size={20} />
+                <LogOut size={18} className="mr-1" />
+                <span className="hidden md:inline">Logout</span>
               </button>
             </div>
           ) : (
             <button 
               onClick={() => setShowAuthModal(true)}
-              className="flex items-center bg-teal-600 hover:bg-teal-700 px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base rounded-lg transition-colors"
+              className="flex items-center bg-accent hover:bg-accent-dark px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base rounded-lg transition-colors"
             >
               <User size={16} className="mr-1 md:mr-2" />
               <span className="hidden xs:inline">Log In</span>
@@ -113,11 +114,11 @@ export default function Header({
           <input
             type="text"
             placeholder="Search bookmarks..."
-            className="py-2 px-4 pr-10 rounded-lg text-gray-800 dark:text-white dark:bg-gray-700 dark:border-gray-600 w-full focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="py-2 px-4 pr-10 rounded-lg text-card-foreground bg-card border border-accent/20 w-full focus:outline-none focus:ring-2 focus:ring-accent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Search className="absolute right-3 top-2.5 text-gray-500 dark:text-gray-400" size={20} />
+          <Search className="absolute right-3 top-2.5 text-accent/60" size={20} />
         </div>
       </div>
     </header>

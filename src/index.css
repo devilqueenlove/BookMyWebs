@@ -2,34 +2,175 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default theme values (light) */
 :root {
-  --primary: #159A9C;
-  --secondary: #002333;
-  --accent: #DEEFE7;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f5;
-  --card-bg: #ffffff;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Main theme colors */
+  --color-primary: #0d9488;
+  --color-secondary: #4f46e5;
+  --color-accent: #0891b2;
+  --color-background: #ffffff;
+  --color-foreground: #1f2937;
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2937;
+  --color-border: #e5e7eb;
+  
+  /* Status colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+  
+  /* Other UI elements */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* Dark theme overrides */
 .dark {
-  --primary: #159A9C;
-  --secondary: #1e3a8a;
-  --accent: #1f2937;
-  --text-primary: #f3f4f6;
-  --text-secondary: #d1d5db;
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
-  --card-bg: #1f2937;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --color-primary: #2dd4bf;
+  --color-secondary: #818cf8;
+  --color-accent: #06b6d4;
+  --color-background: #111827;
+  --color-foreground: #f9fafb;
+  --color-card: #1f2937;
+  --color-card-foreground: #f9fafb;
+  --color-border: #374151;
+  
+  /* Status colors */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-info: #60a5fa;
+  
+  /* Shadows are deeper in dark mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
 }
 
+/* Blue theme */
+.blue {
+  --color-primary: #3b82f6;
+  --color-secondary: #8b5cf6;
+  --color-accent: #06b6d4;
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-card: #1e293b;
+  --color-card-foreground: #f8fafc;
+  --color-border: #334155;
+}
+
+/* Purple theme */
+.purple {
+  --color-primary: #a855f7;
+  --color-secondary: #ec4899;
+  --color-accent: #8b5cf6;
+  --color-background: #ffffff;
+  --color-foreground: #1f2937;
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2937;
+  --color-border: #e5e7eb;
+}
+
+/* Green theme */
+.green {
+  --color-primary: #10b981;
+  --color-secondary: #0d9488;
+  --color-accent: #84cc16;
+  --color-background: #1a2e05;
+  --color-foreground: #f9fafb;
+  --color-card: #2c4a0c;
+  --color-card-foreground: #f9fafb;
+  --color-border: #3f621a;
+}
+
+/* Amber theme */
+.amber {
+  --color-primary: #f59e0b;
+  --color-secondary: #d97706;
+  --color-accent: #ef4444;
+  --color-background: #ffffff;
+  --color-foreground: #1f2937;
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2937;
+  --color-border: #e5e7eb;
+}
+
+/* Slate theme */
+.slate {
+  --color-primary: #64748b;
+  --color-secondary: #475569;
+  --color-accent: #94a3b8;
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-card: #f1f5f9;
+  --color-card-foreground: #0f172a;
+  --color-border: #cbd5e1;
+}
+
+/* Midnight theme */
+.midnight {
+  --color-primary: #6366f1;
+  --color-secondary: #4f46e5;
+  --color-accent: #818cf8;
+  --color-background: #020617;
+  --color-foreground: #f8fafc;
+  --color-card: #0f172a;
+  --color-card-foreground: #f8fafc;
+  --color-border: #1e293b;
+}
+
+/* Sunset theme */
+.sunset {
+  --color-primary: #f97316;
+  --color-secondary: #ea580c;
+  --color-accent: #fb923c;
+  --color-background: #fff7ed;
+  --color-foreground: #431407;
+  --color-card: #ffedd5;
+  --color-card-foreground: #431407;
+  --color-border: #fed7aa;
+}
+
+/* Neon theme */
+.neon {
+  --color-primary: #22c55e;
+  --color-secondary: #ec4899;
+  --color-accent: #facc15;
+  --color-background: #18181b;
+  --color-foreground: #fafafa;
+  --color-card: #27272a;
+  --color-card-foreground: #fafafa;
+  --color-border: #3f3f46;
+}
+
+/* Monochrome theme */
+.monochrome {
+  --color-primary: #525252;
+  --color-secondary: #737373;
+  --color-accent: #a3a3a3;
+  --color-background: #fafafa;
+  --color-foreground: #171717;
+  --color-card: #f5f5f5;
+  --color-card-foreground: #171717;
+  --color-border: #e5e5e5;
+}
+
+/* Smooth transitions for theme changes */
 * {
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Custom selection color based on theme */
+::selection {
+  background-color: var(--color-selection-bg, var(--color-primary));
+  color: var(--color-selection-text, white);
+}
+
+/* Base body styles */
 body {
-  @apply bg-gray-100 dark:bg-gray-900 min-h-screen;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  min-height: 100vh;
 }
