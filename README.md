@@ -9,29 +9,30 @@ BookMyWebs is a modern, feature-rich bookmark manager designed to help you organ
 ## Features
 
 ### Core Features
-- **Bookmark Management**: Add, edit, delete, and organize bookmarks with ease
-- **Search & Filter**: Quickly find bookmarks by title, URL, or description
-- **Category Organization**: Organize bookmarks into customizable categories
-- **Multiple View Modes**: Toggle between grid and list views for your bookmarks
-- **Dynamic Theming**: Light/dark mode and customizable accent colors
-- **Cloud Sync**: Firebase-powered data synchronization across devices
-- **User Authentication**: Secure login with email/password and Google authentication
-- **Responsive Design**: Works beautifully on all devices from mobile to desktop
+- **Bookmark Management**: Add, edit, delete, and organize bookmarks with ease.
+- **Smart Categorization Engine**: Uses a heuristic matching system to automatically suggest categories based on URL patterns, page titles, and metadata.
+- **Link Health Monitor**: A CORS-friendly health checker that monitors bookmark availability by testing asset reachability (favicons) without triggering cross-origin blocks.
+- **Search & Filter**: Quickly find bookmarks with a real-time search interface and category filtering.
+- **Multiple View Modes**: Seamlessly toggle between high-density list views and visual grid views.
+- **Dynamic Theming**: Premium UI with light/dark mode support and customizable accent colors.
+- **Cloud Sync**: Firebase-powered data synchronization ensuring your bookmarks are available across all your browsers.
+- **User Authentication**: Secure login with email/password and Google authentication.
+- **Responsive Design**: Works beautifully on all devices from mobile to desktop.
 
-### UI/UX Features
-- **Modern Interface**: Clean, intuitive design with attention to detail
-- **Fast Performance**: Built with React and optimized for speed
-- **Card & List Views**: Multiple ways to visualize your bookmarks
-- **Smart Favicon Detection**: Automatically fetches website icons
-- **Rich Text Formatting**: Support for descriptions and notes
-- **Automatic Categorization**: Smart categorization of bookmarks based on URL patterns
-- **Import/Export**: Backup and restore your bookmark collection
-- **Settings Panel**: Customize your experience with various preferences
+### Browser Extension
+
+The BookMyWebs Chrome Extension allows you to save bookmarks instantly from any tab without needing to open the main web application.
+
+- **One-Click Save**: Automatically captures the current tab's title and URL.
+- **Category Selection**: Real-time sync of your custom categories from the main app.
+- **Seamless Auth**: Transparently shares your authentication state with the main web app—no double login required.
+- **Installation**: Easily loaded as an unpacked extension for developer mode.
 
 ## Technologies Used
 
 - **Frontend**: React.js, Vite, Tailwind CSS
 - **Backend**: Firebase (Authentication & Firestore)
+- **Extension**: Chrome Extension API (V3), Firestore REST API
 - **State Management**: React Context API
 - **Styling**: Tailwind CSS with CSS variables for theming
 - **Icons**: Lucide React
@@ -97,16 +98,14 @@ BookMyWebs is a modern, feature-rich bookmark manager designed to help you organ
 
 ```
 /src
-  /components
-    /auth        # Authentication components (Login, Signup, AuthModal)
-    /bookmarks   # Bookmark-related components (BookmarkForm, BookmarkList)
-    /layout      # Layout components (Header, Sidebar)
-    /ui          # Reusable UI components
-  /contexts     # React Context providers (AuthContext, ThemeContext)
-  /firebase     # Firebase configuration
-  /utils        # Utility functions including bookmark categorization
-  App.jsx       # Main application component
-  main.jsx      # Entry point
+  /components     # Real-time UI components
+  /contexts       # Auth & Theme state management
+  /firebase       # Configuration and API bridges
+  /utils          # Logic for Smart Categorization & Link Health
+  App.jsx         # Application entry and routing
+/extension        # Chrome Manifest V3 Browser Extension
+  manifest.json   # Extension configuration
+  popup.js        # Extension logic & REST API integration
 ```
 
 ## Implementation History
