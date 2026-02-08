@@ -1,0 +1,243 @@
+/* Antigravity Theme - Chrome Extension Popup */
+:root {
+    --charcoal: #0F1115;
+    --charcoal-light: #161B22;
+    --liquid-teal: #00F5FF;
+    --text-primary: #EDEDED;
+    --text-secondary: #888;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 320px;
+    min-height: 200px;
+    background-color: var(--charcoal);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    padding: 16px;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    color: var(--text-secondary);
+}
+
+.loading-state p {
+    margin-top: 12px;
+    font-size: 12px;
+}
+
+.spinner-large {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--charcoal-light);
+    border-top-color: var(--liquid-teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Login Prompt */
+#login-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0;
+}
+
+#login-prompt .icon-container {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--liquid-teal), #008B8B);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+}
+
+#login-prompt .icon-container svg {
+    color: var(--charcoal);
+}
+
+#login-prompt h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+#login-prompt p {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--liquid-teal), #00C4CC);
+    color: var(--charcoal);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0, 245, 255, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Main Form */
+#main-form header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#main-form h1 {
+    font-size: 16px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--liquid-teal), #EDEDED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.email-badge {
+    font-size: 10px;
+    color: var(--text-secondary);
+    background: var(--charcoal-light);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--charcoal-light);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--liquid-teal);
+}
+
+.form-group input[readonly] {
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.form-group select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+/* Spinner */
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--charcoal);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Status Message */
+.status {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.status.success {
+    background: rgba(0, 245, 255, 0.1);
+    color: var(--liquid-teal);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+}
+
+.status.error {
+    background: rgba(255, 100, 100, 0.1);
+    color: #FF6464;
+    border: 1px solid rgba(255, 100, 100, 0.2);
+}

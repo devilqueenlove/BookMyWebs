@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="var(--color-primary, #0d9488)"/>
+  
+  <!-- City skyline silhouette -->
+  <path d="M80 352V240H120V352H80Z" fill="white"/>
+  <path d="M130 352V200H170V352H130Z" fill="white"/>
+  <path d="M180 352V260H220V352H180Z" fill="white"/>
+  <path d="M230 352V180H270V352H230Z" fill="white"/>
+  
+  <!-- Taller buildings -->
+  <path d="M280 352V160H320V352H280Z" fill="white"/>
+  <path d="M330 352V120H370V352H330Z" fill="white"/>
+  <path d="M380 352V200H420V352H380Z" fill="white"/>
+  
+  <!-- Window details on tallest building -->
+  <rect x="340" y="140" width="20" height="20" fill="var(--color-accent, #0891b2)"/>
+  <rect x="340" y="180" width="20" height="20" fill="var(--color-accent, #0891b2)"/>
+  <rect x="340" y="220" width="20" height="20" fill="var(--color-accent, #0891b2)"/>
+  <rect x="340" y="260" width="20" height="20" fill="var(--color-accent, #0891b2)"/>
+  <rect x="340" y="300" width="20" height="20" fill="var(--color-accent, #0891b2)"/>
+  
+  <!-- Base ground -->
+  <rect x="60" y="352" width="380" height="20" fill="white"/>
+  
+  <!-- Web connections between buildings -->
+  <path d="M120 260C180 210 270 230 330 160" stroke="white" stroke-width="4" stroke-dasharray="8 8"/>
+  <path d="M170 230C230 270 320 250 380 220" stroke="white" stroke-width="4" stroke-dasharray="8 8"/>
+  
+  <!-- Connection nodes -->
+  <circle cx="120" cy="260" r="6" fill="var(--color-secondary, #4f46e5)"/>
+  <circle cx="170" cy="230" r="6" fill="var(--color-secondary, #4f46e5)"/>
+  <circle cx="220" cy="280" r="6" fill="var(--color-secondary, #4f46e5)"/>
+  <circle cx="270" cy="210" r="6" fill="var(--color-secondary, #4f46e5)"/>
+  <circle cx="330" cy="160" r="6" fill="var(--color-secondary, #4f46e5)"/>
+  <circle cx="380" cy="220" r="6" fill="var(--color-secondary, #4f46e5)"/>
+</svg>
